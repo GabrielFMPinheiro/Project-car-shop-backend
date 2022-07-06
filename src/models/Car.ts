@@ -5,14 +5,26 @@ import MongoModel from './MongoModel';
 interface CarDocument extends Car, Document {}
 
 const carSchema = new Schema<CarDocument>({
-  model: String,
-  year: Number,
-  color: String,
+  model: {
+    type: String,
+    required: true,
+  },
+  year: {
+    type: Number,
+    required: true,
+  },
+  color: {
+    type: String,
+    required: true,
+  },
   status: {
     type: Boolean,
     required: false,
   },
-  buyValue: Number,
+  buyValue: {
+    type: Number,
+    required: true,
+  },
 });
 
 class CarModel extends MongoModel<Car> {
