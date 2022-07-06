@@ -3,5 +3,5 @@ export interface Model<T> {
   read(): Promise<T[]>;
   readOne(id_: string): Promise<T | null>;
   update(id_: string, obj: T): Promise<T | null>;
-  delete(id: string): Promise<T | null>;
+  delete(id_: string): Promise<T | null>;
 }
