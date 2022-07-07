@@ -87,7 +87,6 @@ export class CarModelMock implements Model<Car> {
 
   update = async (id: string, obj: Car): Promise<CarMockReceived | null> => {
     if (wrongID === id || Object.keys(obj).length === 0) {
-      console.log('entrouuu');
       return null;
     }
 
