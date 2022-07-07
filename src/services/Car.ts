@@ -1,5 +1,5 @@
 import { Car, CarSchema } from '../interfaces/CarInterface';
-import Service from '.';
+import Service from '../schemas/Service';
 import { ServiceError } from '../interfaces/ServiceInterface';
 import CarModel from '../models/Car';
 import { Model } from '../interfaces/ModelInterface';
@@ -10,7 +10,7 @@ class CarService extends Service<Car> {
   }
 
   create = async (obj: Car): Promise<Car | ServiceError | null> => {
-    const parsed = CarSchema.safeParse(obj);
+    const parsed = JSON.parse(JSON.stringify(CarSchema.safeParse(obj)));
 
     if (!parsed.success) {
       return { error: parsed.error };
@@ -22,7 +22,7 @@ class CarService extends Service<Car> {
     id: string,
     obj: Car,
   ): Promise<Car | ServiceError | null> {
-    const parsed = CarSchema.safeParse(obj);
+    const parsed = JSON.parse(JSON.stringify(CarSchema.safeParse(obj)));
 
     if (!parsed.success) {
       return { error: parsed.error };

@@ -9,6 +9,11 @@ export interface RequestWithBody<T> extends Request {
   body: T;
 }
 
+export interface RequestWithBodyWithParams<T> extends Request {
+  params: { id: string };
+  body: T;
+}
+
 enum ControllerErrors {
   internal = 'Internal Server Error',
   notFound = 'Object not found',
@@ -27,7 +32,7 @@ abstract class Controller<T> {
 
   abstract create(
     req: RequestWithBody<T>,
-    res: Response<T | ResponseError>,
+    res: Response<T | ResponseError | null>,
   ): Promise<typeof res>;
 
   read = async (
@@ -36,7 +41,7 @@ abstract class Controller<T> {
   ): Promise<typeof res> => {
     try {
       const objs = await this.service.read();
-      return res.json(objs);
+      return res.status(200).json(objs);
     } catch (err) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -48,7 +53,7 @@ abstract class Controller<T> {
   ): Promise<typeof res>;
 
   abstract update(
-    _req: Request<{ id: string; obj: T }>,
+    req: RequestWithBodyWithParams<T>,
     res: Response<T | ResponseError>,
   ): Promise<typeof res>;
 

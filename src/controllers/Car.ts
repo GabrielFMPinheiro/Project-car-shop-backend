@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { isValidObjectId } from 'mongoose';
-import Controller, { RequestWithBody, ResponseError } from '.';
+import Controller, {
+  RequestWithBody,
+  RequestWithBodyWithParams,
+  ResponseError,
+} from '../schemas/Controller';
 import CarService from '../services/Car';
 import { Car } from '../interfaces/CarInterface';
 import { Service as StandardService } from '../interfaces/ServiceInterface';
@@ -22,7 +26,7 @@ class CarController extends Controller<Car> {
 
   create = async (
     req: RequestWithBody<Car>,
-    res: Response<Car | ResponseError>,
+    res: Response<Car | ResponseError | null>,
   ): Promise<typeof res> => {
     try {
       const { body } = req;
@@ -53,7 +57,7 @@ class CarController extends Controller<Car> {
 
       const car = await this.service.readOne(id);
       return car
-        ? res.json(car)
+        ? res.status(200).json(car)
         : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
@@ -61,14 +65,14 @@ class CarController extends Controller<Car> {
   };
 
   update = async (
-    req: Request<{ id: string; obj: Car }>,
+    req: RequestWithBodyWithParams<Car>,
     res: Response<Car | ResponseError>,
   ): Promise<typeof res> => {
     try {
       const { id } = req.params;
       const carData = req.body;
 
-      if (!isValidObjectId(id) || !Object.keys(carData).length) {
+      if (!this.validateRequest(carData, id)) {
         return res.status(400).json({ error: this.errors.idBadFormat });
       }
 
@@ -77,6 +81,8 @@ class CarController extends Controller<Car> {
       if (car === null) {
         return res.status(404).json({ error: this.errors.notFound });
       }
+
+      if ('error' in car) return res.status(400).json(car);
 
       return res.status(200).json(car);
     } catch (err) {
@@ -96,12 +102,19 @@ class CarController extends Controller<Car> {
       }
 
       const car = await this.service.delete(id);
+
       return car
         ? res.status(204).json('')
         : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
+  };
+
+  private validateRequest = (obj: Car, id = ''): boolean => {
+    if (!Object.keys(obj).length) return false;
+    if (!isValidObjectId(id)) return false;
+    return true;
   };
 }
 
