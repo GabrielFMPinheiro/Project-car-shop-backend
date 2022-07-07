@@ -72,7 +72,7 @@ class CarController extends Controller<Car> {
       const { id } = req.params;
       const carData = req.body;
 
-      if (!this.validateRequest(carData, id)) {
+      if (!isValidObjectId(id)) {
         return res.status(400).json({ error: this.errors.idBadFormat });
       }
 
@@ -109,12 +109,6 @@ class CarController extends Controller<Car> {
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
-  };
-
-  private validateRequest = (obj: Car, id = ''): boolean => {
-    if (!Object.keys(obj).length) return false;
-    if (!isValidObjectId(id)) return false;
-    return true;
   };
 }
 

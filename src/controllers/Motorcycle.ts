@@ -72,10 +72,9 @@ class MotorcycleController extends Controller<Motorcycle> {
       const { id } = req.params;
       const MotorcycleData = req.body;
 
-      if (!this.validateRequest(MotorcycleData, id)) {
+      if (!isValidObjectId(id)) {
         return res.status(400).json({ error: this.errors.idBadFormat });
       }
-
       const motorcycle = await this.service.update(id, MotorcycleData);
 
       if (motorcycle === null) {
@@ -109,12 +108,6 @@ class MotorcycleController extends Controller<Motorcycle> {
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
     }
-  };
-
-  private validateRequest = (obj: Motorcycle, id = ''): boolean => {
-    if (!Object.keys(obj).length) return false;
-    if (!isValidObjectId(id)) return false;
-    return true;
   };
 }
 
