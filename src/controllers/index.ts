@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Service from '../services';
+import { Service as StandardService } from '../interfaces/ServiceInterface';
 
 export type ResponseError = {
   error: unknown;
@@ -13,6 +13,8 @@ enum ControllerErrors {
   internal = 'Internal Server Error',
   notFound = 'Object not found',
   requiredId = 'Id is required',
+  bodyBadFormat = 'Body is not valid',
+  idBadFormat = 'Id must have 24 hexadecimal characters',
   badRequest = 'Bad request',
 }
 
@@ -21,7 +23,7 @@ abstract class Controller<T> {
 
   protected errors = ControllerErrors;
 
-  constructor(protected service: Service<T>) {}
+  constructor(protected service: StandardService<T>) {}
 
   abstract create(
     req: RequestWithBody<T>,
@@ -52,7 +54,7 @@ abstract class Controller<T> {
 
   abstract delete(
     req: Request<{ id: string }>,
-    res: Response<T | ResponseError>,
+    res: Response<'' | ResponseError>,
   ): Promise<typeof res>;
 }
 export default Controller;

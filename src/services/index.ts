@@ -1,10 +1,10 @@
-import { ZodError } from 'zod';
 import { Model } from '../interfaces/ModelInterface';
+import {
+  ServiceError,
+  Service as StandardService,
+} from '../interfaces/ServiceInterface';
 
-export interface ServiceError {
-  error: ZodError;
-}
-abstract class Service<T> {
+abstract class Service<T> implements StandardService<T> {
   constructor(protected model: Model<T>) {}
 
   public async create(obj: T): Promise<T | null | ServiceError> {
@@ -19,7 +19,7 @@ abstract class Service<T> {
     return this.model.readOne(id);
   }
 
-  public async update(id: string, obj: T): Promise<T | null> {
+  public async update(id: string, obj: T): Promise<T | ServiceError | null> {
     return this.model.update(id, obj);
   }
 

@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
+import { isValidObjectId } from 'mongoose';
 import Controller, { RequestWithBody, ResponseError } from '.';
 import CarService from '../services/Car';
 import { Car } from '../interfaces/CarInterface';
+import { Service as StandardService } from '../interfaces/ServiceInterface';
 
 class CarController extends Controller<Car> {
   private _route: string;
 
-  constructor(service = new CarService(), route = '/cars') {
+  constructor(
+    service: StandardService<Car> = new CarService(),
+    route = '/cars',
+  ) {
     super(service);
     this._route = route;
   }
@@ -19,9 +24,10 @@ class CarController extends Controller<Car> {
     req: RequestWithBody<Car>,
     res: Response<Car | ResponseError>,
   ): Promise<typeof res> => {
-    const { body } = req;
     try {
+      const { body } = req;
       const car = await this.service.create(body);
+
       if (!car) {
         return res.status(500).json({ error: this.errors.internal });
       }
@@ -38,8 +44,13 @@ class CarController extends Controller<Car> {
     req: Request<{ id: string }>,
     res: Response<Car | ResponseError>,
   ): Promise<typeof res> => {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
+
+      if (!isValidObjectId(id)) {
+        return res.status(400).json({ error: this.errors.idBadFormat });
+      }
+
       const car = await this.service.readOne(id);
       return car
         ? res.json(car)
@@ -56,11 +67,18 @@ class CarController extends Controller<Car> {
     try {
       const { id } = req.params;
       const carData = req.body;
+
+      if (!isValidObjectId(id) || !Object.keys(carData).length) {
+        return res.status(400).json({ error: this.errors.idBadFormat });
+      }
+
       const car = await this.service.update(id, carData);
-      if (!car) {
+
+      if (car === null) {
         return res.status(404).json({ error: this.errors.notFound });
       }
-      return res.json(car);
+
+      return res.status(200).json(car);
     } catch (err) {
       return res.status(500).json({ error: this.errors.internal });
     }
@@ -68,13 +86,18 @@ class CarController extends Controller<Car> {
 
   delete = async (
     req: Request<{ id: string }>,
-    res: Response<Car | ResponseError>,
+    res: Response<'' | ResponseError>,
   ): Promise<typeof res> => {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
+
+      if (!isValidObjectId(id)) {
+        return res.status(400).json({ error: this.errors.idBadFormat });
+      }
+
       const car = await this.service.delete(id);
       return car
-        ? res.json(car)
+        ? res.status(204).json('')
         : res.status(404).json({ error: this.errors.notFound });
     } catch (error) {
       return res.status(500).json({ error: this.errors.internal });
